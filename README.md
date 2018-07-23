@@ -1,4 +1,4 @@
-# gb2260
+# GB2260
 SpringBoot2.0 实现行政区域划分抓取
 
 需要DB, Redis配置
