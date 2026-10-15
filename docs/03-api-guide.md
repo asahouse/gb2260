@@ -2,6 +2,8 @@
 
 本文档汇编 GB2260 系统的全部 HTTP RESTful API 接口规范、参数说明、响应示例及 Swagger 在线调试方法。
 
+> **导航**：[⬅️ 返回项目主页 (README.md)](../README.md)
+
 ---
 
 ## 目录
@@ -19,13 +21,13 @@
 
 - **Swagger UI 访问入口**：`http://localhost:8080/swagger-ui.html`
 - **OpenAPI v2 Spec 地址**：`http://localhost:8080/v2/api-docs`
-- 核心配置类：[`SwaggerConfig.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/config/swagger/SwaggerConfig.java)
+- 核心配置类：[`SwaggerConfig.java`](../src/main/java/org/codework/tools/gb2260/config/swagger/SwaggerConfig.java)
 
 ---
 
 ## 二、Web 控制台与管理查询接口 (`/api/dashboard`)
 
-控制器实现：[`DashboardController.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/controller/DashboardController.java)
+控制器实现：[`DashboardController.java`](../src/main/java/org/codework/tools/gb2260/controller/DashboardController.java)
 
 | 请求方式 | 接口路径 | 接口描述 | 参数说明 |
 | :---: | :--- | :--- | :--- |
@@ -64,7 +66,7 @@
 
 ## 三、爬虫调度与续爬控制接口 (`/api/run`)
 
-控制器实现：[`RunController.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/controller/RunController.java)
+控制器实现：[`RunController.java`](../src/main/java/org/codework/tools/gb2260/controller/RunController.java)
 
 | 请求方式 | 接口路径 | 接口描述 | 说明 |
 | :---: | :--- | :--- | :--- |
@@ -90,7 +92,7 @@
 
 ## 四、级联数据查询接口 (`/api/get`)
 
-控制器实现：[`GetController.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/controller/GetController.java)
+控制器实现：[`GetController.java`](../src/main/java/org/codework/tools/gb2260/controller/GetController.java)
 
 面向 Web 前端下拉级联组件（如 Element UI Cascader），直读 Redis 缓存，毫秒级响应，按 12 位标准编码升序排列。
 
@@ -116,3 +118,14 @@
   ]
 }
 ```
+
+---
+
+**系列专题导航**：
+- [01 - 系统全局架构与核心机制](01-architecture.md)
+- [02 - 断点续爬与差集自愈机制](02-refire-mechanism.md)
+- [03 - 接口详细规范与在线调试](03-api-guide.md)
+- [04 - 数据库与缓存拓扑设计规范](04-database-and-cache.md)
+- [05 - 生产部署与运维全景指南](05-deployment-guide.md)
+- [06 - 全链路自动化测试与质量保障](06-testing-and-validation.md)
+- [⬅️ 返回项目主页 (README.md)](../README.md)

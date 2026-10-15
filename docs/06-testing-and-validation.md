@@ -2,6 +2,8 @@
 
 本文档详细说明 GB2260 自动化测试套件的架构设计、测试用例清单、运行方法及断点自愈与全量入库的验收标准。
 
+> **导航**：[⬅️ 返回项目主页 (README.md)](../README.md)
+
 ---
 
 ## 目录
@@ -25,17 +27,17 @@
 
 | 测试类 | 用例数 | 测试性质 | 覆盖目标 |
 | :--- | :---: | :--- | :--- |
-| [`CrawlRefireEndToEndTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/CrawlRefireEndToEndTest.java) | 4 | 端到端集成 | `/api/run/refire` 连通性、残缺断点自愈补偿（16 区县+300+街道）、幂等重放零冲突、审计流水记录 |
-| [`NationwideDataCrawlTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/NationwideDataCrawlTest.java) | 1 | 端到端全量验收 | 全国 34 省级、341 地市、2,974 区县、41,351 街道全量 20 秒极速落库与 Redis 同步验证 |
-| [`DashboardEndToEndTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/DashboardEndToEndTest.java) | 5 | 控制台集成 | Thymeleaf HTML 页面渲染、DB vs Redis 一致性指标、多维分页查询、历史审计与缓存探针 |
-| [`RunThreadPoolExecutorTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/RunThreadPoolExecutorTest.java) | 2 | 并发单元测试 | 多层异步在途任务原子扣减、isEndTask 平滑收敛、`isNormalCompleted` 与 `shutdownNow` 判定 |
-| [`McaApiFeasibilityTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/McaApiFeasibilityTest.java) | 4 | 网络与集成 | 民政部真实官方接口连通性、直辖市虚拟城市穿透、省直管县级市三转四穿透、端到端落库 |
-| [`McaSnapshotServiceTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/McaSnapshotServiceTest.java) | 3 | 单元测试 | 本地 1.9MB 快照读取、3344 个节点正向倒排索引构建、直辖市及前缀检索性能 |
-| [`RealHttpLiveCrawlerTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/RealHttpLiveCrawlerTest.java) | 1 | 冒烟集成测试 | 真实网络环境请求与分发调度 |
-| [`EndToEndPipelineTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/EndToEndPipelineTest.java) | 3 | 静态模式集成 | 统计局 HTML 规则抓取与 Mock 全链路 |
-| [`LiveDbCrawlAndPrintTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/LiveDbCrawlAndPrintTest.java) | 1 | 实盘落库测试 | 数据库即时写入验证 |
-| [`AreaInfoTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/AreaInfoTest.java) | 1 | 实体单元测试 | 实体 JSON 序列化与反序列化一致性 |
-| [`AreaSnatchHelperTest.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260/AreaSnatchHelperTest.java) | 1 | 工具类测试 | 12 位标准代码补全与短码截取算法 |
+| [`CrawlRefireEndToEndTest.java`](../src/test/java/org/codework/tools/gb2260/CrawlRefireEndToEndTest.java) | 4 | 端到端集成 | `/api/run/refire` 连通性、残缺断点自愈补偿（16 区县+300+街道）、幂等重放零冲突、审计流水记录 |
+| [`NationwideDataCrawlTest.java`](../src/test/java/org/codework/tools/gb2260/NationwideDataCrawlTest.java) | 1 | 端到端全量验收 | 全国 34 省级、341 地市、2,974 区县、41,351 街道全量 20 秒极速落库与 Redis 同步验证 |
+| [`DashboardEndToEndTest.java`](../src/test/java/org/codework/tools/gb2260/DashboardEndToEndTest.java) | 5 | 控制台集成 | Thymeleaf HTML 页面渲染、DB vs Redis 一致性指标、多维分页查询、历史审计与缓存探针 |
+| [`RunThreadPoolExecutorTest.java`](../src/test/java/org/codework/tools/gb2260/RunThreadPoolExecutorTest.java) | 2 | 并发单元测试 | 多层异步在途任务原子扣减、isEndTask 平滑收敛、`isNormalCompleted` 与 `shutdownNow` 判定 |
+| [`McaApiFeasibilityTest.java`](../src/test/java/org/codework/tools/gb2260/McaApiFeasibilityTest.java) | 4 | 网络与集成 | 民政部真实官方接口连通性、直辖市虚拟城市穿透、省直管县级市三转四穿透、端到端落库 |
+| [`McaSnapshotServiceTest.java`](../src/test/java/org/codework/tools/gb2260/McaSnapshotServiceTest.java) | 3 | 单元测试 | 本地 1.9MB 快照读取、3344 个节点正向倒排索引构建、直辖市及前缀检索性能 |
+| [`RealHttpLiveCrawlerTest.java`](../src/test/java/org/codework/tools/gb2260/RealHttpLiveCrawlerTest.java) | 1 | 冒烟集成测试 | 真实网络环境请求与分发调度 |
+| [`EndToEndPipelineTest.java`](../src/test/java/org/codework/tools/gb2260/EndToEndPipelineTest.java) | 3 | 静态模式集成 | 统计局 HTML 规则抓取与 Mock 全链路 |
+| [`LiveDbCrawlAndPrintTest.java`](../src/test/java/org/codework/tools/gb2260/LiveDbCrawlAndPrintTest.java) | 1 | 实盘落库测试 | 数据库即时写入验证 |
+| [`AreaInfoTest.java`](../src/test/java/org/codework/tools/gb2260/AreaInfoTest.java) | 1 | 实体单元测试 | 实体 JSON 序列化与反序列化一致性 |
+| [`AreaSnatchHelperTest.java`](../src/test/java/org/codework/tools/gb2260/AreaSnatchHelperTest.java) | 1 | 工具类测试 | 12 位标准代码补全与短码截取算法 |
 
 ---
 
@@ -81,3 +83,14 @@ mvn test "-Dtest=DashboardEndToEndTest" -DforkCount=0
 ### 4. 执行器在途原子遥测与生命周期测试 (`RunThreadPoolExecutorTest`)
 - 验证在多层异步嵌套派发任务时，`inFlightTasks` 能正确递增递减并在任务收敛时归零；
 - 验证 `isNormalCompleted()` 判定与 `shutdownNow()` 中止标记逻辑。
+
+---
+
+**系列专题导航**：
+- [01 - 系统全局架构与核心机制](01-architecture.md)
+- [02 - 断点续爬与差集自愈机制](02-refire-mechanism.md)
+- [03 - 接口详细规范与在线调试](03-api-guide.md)
+- [04 - 数据库与缓存拓扑设计规范](04-database-and-cache.md)
+- [05 - 生产部署与运维全景指南](05-deployment-guide.md)
+- [06 - 全链路自动化测试与质量保障](06-testing-and-validation.md)
+- [⬅️ 返回项目主页 (README.md)](../README.md)

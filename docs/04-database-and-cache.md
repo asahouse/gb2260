@@ -2,6 +2,8 @@
 
 本文档详尽说明 MySQL 关系型持久化表结构设计、字段说明、索引规范以及 Redis 缓存键拓扑设计。
 
+> **导航**：[⬅️ 返回项目主页 (README.md)](../README.md)
+
 ---
 
 ## 目录
@@ -20,7 +22,7 @@
 
 ## 一、MySQL 表结构体系与设计规范
 
-数据库初始化脚本完整位于：[`src/main/resources/db.sql`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/resources/db.sql)
+数据库初始化脚本完整位于：[`src/main/resources/db.sql`](../src/main/resources/db.sql)
 
 ### 1. 表关系拓扑图
 
@@ -69,7 +71,7 @@ crawl_history (id[PK], task_flag[IDX], data_source, province_filter, is_offline_
 
 ### 3. 历史审计流水表 (`crawl_history`)
 
-持久化于实体类 [`CrawlHistory.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/entity/CrawlHistory.java)：
+持久化于实体类 [`CrawlHistory.java`](../src/main/java/org/codework/tools/gb2260/entity/CrawlHistory.java)：
 - `id`：BIGINT AUTO_INCREMENT PRIMARY KEY；
 - `task_flag`：VARCHAR(64) NOT NULL UNIQUE，批次标识（全量为时间戳毫秒数，续爬为 `refire-{timestamp}`）；
 - `data_source`：VARCHAR(32)，数据源引擎（`mca` 或 `stats`）；
@@ -132,3 +134,14 @@ redis-cli -n 10 SMEMBERS gb2260:area:index:town:110101000000
 # 穿透查询特定街道名称
 redis-cli -n 10 HGET gb2260:area:town 110101001000
 ```
+
+---
+
+**系列专题导航**：
+- [01 - 系统全局架构与核心机制](01-architecture.md)
+- [02 - 断点续爬与差集自愈机制](02-refire-mechanism.md)
+- [03 - 接口详细规范与在线调试](03-api-guide.md)
+- [04 - 数据库与缓存拓扑设计规范](04-database-and-cache.md)
+- [05 - 生产部署与运维全景指南](05-deployment-guide.md)
+- [06 - 全链路自动化测试与质量保障](06-testing-and-validation.md)
+- [⬅️ 返回项目主页 (README.md)](../README.md)

@@ -2,6 +2,8 @@
 
 本文档深度剖析系统方案一（基于已有数据树的“层级差集推导与补偿下钻”自愈架构）的产生背景、核心算法、性能批处理优化及操作流程。
 
+> **导航**：[⬅️ 返回项目主页 (README.md)](../README.md)
+
 ---
 
 ## 目录
@@ -30,7 +32,7 @@
 1. **非破坏性重放 (Non-Destructive Replay)**：
    - 严禁调用 `truncateAll()` 与 Redis `flushDB()`，全量保留中断前已落库的完好节点与索引。
 2. **严格幂等写入 (Idempotency Guarantee)**：
-   - 在 [`MsgEventSubscriber.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/guava/MsgEventSubscriber.java) 持久化前，基于实体类标注的 `@TableId` 进行 `selectById(code)` 检查：
+   - 在 [`MsgEventSubscriber.java`](../src/main/java/org/codework/tools/gb2260/snatch/guava/MsgEventSubscriber.java) 持久化前，基于实体类标注的 `@TableId` 进行 `selectById(code)` 检查：
      - 若记录不存在，执行 `insert()`；
      - 若记录已存在，执行 `updateById()`；
    - 彻底杜绝主键冲突（`Duplicate entry for key 'PRIMARY'`），保证重放安全。
@@ -104,7 +106,7 @@ sequenceDiagram
 
 若在推导全国 2,974 个区县是否有下属街道时，循环执行近 3,000 次 SQL 查询（`SELECT count(1) FROM town WHERE county_code = ?`），将产生数千次网络 I/O，耗时达数秒甚至几十秒。
 
-在 [`AreaSnatchHandler.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/AreaSnatchHandler.java) 中设计了 `queryGroupCount()` 批处理聚合机制：
+在 [`AreaSnatchHandler.java`](../src/main/java/org/codework/tools/gb2260/snatch/AreaSnatchHandler.java) 中设计了 `queryGroupCount()` 批处理聚合机制：
 
 ```java
 // 仅需单次 SQL 聚合查询，10ms 内加载全表全部区县的子街道计数拓扑
@@ -134,3 +136,14 @@ Map<String, Long> townCountByCounty = list.stream().collect(
 ### 2. REST API 接口调用
 - 直接调用专用接口：`GET /api/run/refire`；
 - 或调用通用启动接口带参：`GET /api/run/start?refire=true`。
+
+---
+
+**系列专题导航**：
+- [01 - 系统全局架构与核心机制](01-architecture.md)
+- [02 - 断点续爬与差集自愈机制](02-refire-mechanism.md)
+- [03 - 接口详细规范与在线调试](03-api-guide.md)
+- [04 - 数据库与缓存拓扑设计规范](04-database-and-cache.md)
+- [05 - 生产部署与运维全景指南](05-deployment-guide.md)
+- [06 - 全链路自动化测试与质量保障](06-testing-and-validation.md)
+- [⬅️ 返回项目主页 (README.md)](../README.md)

@@ -4,7 +4,7 @@
 [![Spring Boot](https://img.shields.io/badge/Spring%20Boot-2.0.3.RELEASE-brightgreen.svg)](https://spring.io/projects/spring-boot)
 [![MyBatis-Plus](https://img.shields.io/badge/MyBatis--Plus-3.0--beta-blue.svg)](https://baomidou.com/)
 [![Swagger](https://img.shields.io/badge/Swagger-2.9.2-green.svg)](http://localhost:8080/swagger-ui.html)
-[![Tests](https://img.shields.io/badge/Tests-26%20Passed-success.svg)](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/test/java/org/codework/tools/gb2260)
+[![Tests](https://img.shields.io/badge/Tests-26%20Passed-success.svg)](src/test/java/org/codework/tools/gb2260)
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](LICENSE)
 
 基于 **Spring Boot 2.0.3** 构建的全国行政区划（遵循中华人民共和国国家标准 **GB/T 2260**）多线程高并发采集、双引擎调度、双重持久化（MySQL 关系型 + Redis 高性能缓存）、**基于树状差集推导的断点续爬自愈 (Refire)** 以及面向前端级联选择器的在线查询服务。
@@ -156,31 +156,31 @@ sequenceDiagram
 
 1. **双引擎体系与平滑熔断降级**：
    - 包含民政部现代化 JSON API 引擎（`mca`，覆盖四级）与统计局历史镜像引擎（`stats`，覆盖五级）；
-   - 内置 [`McaSnapshotService.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/McaSnapshotService.java) 1.9MB 本地权威快照，遇网络抖动或 502 时毫秒级自动降级，支持秒级入库的 Offline-First 模式。
-   - 详见专题文档：[docs/01-architecture.md](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/01-architecture.md)。
+   - 内置 [`McaSnapshotService.java`](src/main/java/org/codework/tools/gb2260/snatch/McaSnapshotService.java) 1.9MB 本地权威快照，遇网络抖动或 502 时毫秒级自动降级，支持秒级入库的 Offline-First 模式。
+   - 详见专题文档：[docs/01-architecture.md](docs/01-architecture.md)。
 2. **Guava EventBus 异步解耦**：
-   - 彻底摒弃传统递归爬虫，将行政区划采集解耦为省、市、县、镇各层级独立事件，由 [`MsgEventSubscriber.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/guava/MsgEventSubscriber.java) 异步下钻分发，避免递归栈溢出。
+   - 彻底摒弃传统递归爬虫，将行政区划采集解耦为省、市、县、镇各层级独立事件，由 [`MsgEventSubscriber.java`](src/main/java/org/codework/tools/gb2260/snatch/guava/MsgEventSubscriber.java) 异步下钻分发，避免递归栈溢出。
 3. **在途任务原子遥测与收敛控制**：
-   - 自定义 [`RunThreadPoolExecutor.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/guava/RunThreadPoolExecutor.java) 维护原子未完成任务计数 `inFlightTasks`；
+   - 自定义 [`RunThreadPoolExecutor.java`](src/main/java/org/codework/tools/gb2260/snatch/guava/RunThreadPoolExecutor.java) 维护原子未完成任务计数 `inFlightTasks`；
    - 重写生命周期钩子，通过 `isNormalCompleted()` 精确判定自然完结（`SUCCESS`）与主动终止（`TERMINATED`），任务归零时平滑释放资源并回写审计日志。
 4. **双重持久化与严格幂等写入**：
    - 实体类显式标注 MyBatis-Plus `@TableId`，写入前执行 `selectById`，不存在则 `insert`，存在则 `updateById`，杜绝重复消费时的主键冲突；
    - Redis 构建 `gb2260:area:{layer}` Hash 实体字典与 `gb2260:area:index:*` Set 关系索引，毫秒级响应前端级联查询。
-   - 详见专题文档：[docs/04-database-and-cache.md](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/04-database-and-cache.md)。
+   - 详见专题文档：[docs/04-database-and-cache.md](docs/04-database-and-cache.md)。
 5. **树状差集推导与断点自愈 (Refire)**：
    - 针对进程中断、强制终止或网络超时，提供非破坏性自愈方案；
    - 基于 `groupBy` 批处理单次 SQL 聚合（耗时 < 10ms）在内存中快速推导 2,974 个区县的下级街道差集，仅对缺失分支精准补偿下钻。
-   - 详见专题文档：[docs/02-refire-mechanism.md](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/02-refire-mechanism.md)。
+   - 详见专题文档：[docs/02-refire-mechanism.md](docs/02-refire-mechanism.md)。
 
 ---
 
 ## 四、快速部署方式
 
-详细生产部署手册、MySQL/Redis 配置规范、Docker 容器化及 Systemd 服务守护请参阅专题文档：[docs/05-deployment-guide.md](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/05-deployment-guide.md)。
+详细生产部署手册、MySQL/Redis 配置规范、Docker 容器化及 Systemd 服务守护请参阅专题文档：[docs/05-deployment-guide.md](docs/05-deployment-guide.md)。
 
 ### 4.1 方式一：Docker Compose 一键全栈编排 (推荐)
 
-项目根目录下提供了全栈编排文件 [`docker-compose.yml`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docker-compose.yml)，内置 MySQL 5.7（自动挂载并执行 `db.sql` 初始化）、Redis 6（带 AOF 持久化与密码保护）以及 GB2260 应用服务：
+项目根目录下提供了全栈编排文件 [`docker-compose.yml`](docker-compose.yml)，内置 MySQL 5.7（自动挂载并执行 `db.sql` 初始化）、Redis 6（带 AOF 持久化与密码保护）以及 GB2260 应用服务：
 
 ```bash
 # 1. 编译并打包应用 Jar
@@ -220,12 +220,12 @@ java -Xms512m -Xmx2048m -Dfile.encoding=UTF-8 \
 
 | 专题文档 | 主要内容与涵盖模块 | 导航链接 |
 | :--- | :--- | :---: |
-| **01 - 系统全局架构与核心机制** | 系统全局拓扑、双引擎体系、EventBus 异步解耦、原子遥测与双引擎详细对比 | [查看文档](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/01-architecture.md) |
-| **02 - 断点续爬与差集自愈机制** | 中断挑战、四大防护准则、自愈补偿时序图、`groupBy` 批处理聚合与操作规范 | [查看文档](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/02-refire-mechanism.md) |
-| **03 - 接口详细规范与在线调试** | Swagger 在线沙箱、Web 控制台接口 (`/api/dashboard/*`)、调度接口 (`/api/run/*`)、级联接口 (`/api/get/*`) | [查看文档](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/03-api-guide.md) |
-| **04 - 数据库与缓存拓扑设计规范** | MySQL 5 级表结构与索引设计、`crawl_history` 审计表、Redis Hash/Set 键拓扑与 CLI 命令 | [查看文档](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/04-database-and-cache.md) |
-| **05 - 生产部署与运维全景指南** | MySQL 规范、Redis 规范、Jar 进程部署、Docker 部署、Docker Compose 全栈编排、Systemd 守护 | [查看文档](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/05-deployment-guide.md) |
-| **06 - 全链路自动化测试与质量保障** | 测试体系架构、26 个测试用例覆盖矩阵、断点自愈验收、全国全量落盘测试指标 | [查看文档](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/06-testing-and-validation.md) |
+| **01 - 系统全局架构与核心机制** | 系统全局拓扑、双引擎体系、EventBus 异步解耦、原子遥测与双引擎详细对比 | [查看文档](docs/01-architecture.md) |
+| **02 - 断点续爬与差集自愈机制** | 中断挑战、四大防护准则、自愈补偿时序图、`groupBy` 批处理聚合与操作规范 | [查看文档](docs/02-refire-mechanism.md) |
+| **03 - 接口详细规范与在线调试** | Swagger 在线沙箱、Web 控制台接口 (`/api/dashboard/*`)、调度接口 (`/api/run/*`)、级联接口 (`/api/get/*`) | [查看文档](docs/03-api-guide.md) |
+| **04 - 数据库与缓存拓扑设计规范** | MySQL 5 级表结构与索引设计、`crawl_history` 审计表、Redis Hash/Set 键拓扑与 CLI 命令 | [查看文档](docs/04-database-and-cache.md) |
+| **05 - 生产部署与运维全景指南** | MySQL 规范、Redis 规范、Jar 进程部署、Docker 部署、Docker Compose 全栈编排、Systemd 守护 | [查看文档](docs/05-deployment-guide.md) |
+| **06 - 全链路自动化测试与质量保障** | 测试体系架构、26 个测试用例覆盖矩阵、断点自愈验收、全国全量落盘测试指标 | [查看文档](docs/06-testing-and-validation.md) |
 
 ---
 

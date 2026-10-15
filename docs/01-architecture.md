@@ -2,6 +2,8 @@
 
 本文档全面阐述 GB2260 行政区划采集与级联服务的设计哲学、双引擎体系、事件驱动模型及核心机制实现。
 
+> **导航**：[⬅️ 返回项目主页 (README.md)](../README.md)
+
 ---
 
 ## 目录
@@ -81,16 +83,16 @@
 ## 二、七大核心设计机制详解
 
 ### 1. 双引擎可插拔数据源与平滑熔断降级
-- **民政部引擎 (`mca`)**：通过 [`AreaHttpFetcher.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/AreaHttpFetcher.java) 请求官方全国地名信息查询平台 API，专为政务四级区划（省、市、县、镇/街道）打造。
-- **平滑熔断与快照机制**：针对民政部线上 API 存在的 CDN 502、DNS 解析超时或防爬拦截，引入 [`McaSnapshotService.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/McaSnapshotService.java) 内置 1.9MB 本地权威快照（`pcas-code.json`），实现正向倒排索引秒级解析与 **Offline-First（离线优先）** 模式。
+- **民政部引擎 (`mca`)**：通过 [`AreaHttpFetcher.java`](../src/main/java/org/codework/tools/gb2260/snatch/AreaHttpFetcher.java) 请求官方全国地名信息查询平台 API，专为政务四级区划（省、市、县、镇/街道）打造。
+- **平滑熔断与快照机制**：针对民政部线上 API 存在的 CDN 502、DNS 解析超时或防爬拦截，引入 [`McaSnapshotService.java`](../src/main/java/org/codework/tools/gb2260/snatch/McaSnapshotService.java) 内置 1.9MB 本地权威快照（`pcas-code.json`），实现正向倒排索引秒级解析与 **Offline-First（离线优先）** 模式。
 - **统计局引擎 (`stats`)**：针对国家统计局城乡五级（含村委会/居委会）历史静态镜像，自研 GBK 流式解析器，结合动态防封休眠（`sleep-min` / `sleep-max`）保障鲁棒性。
 
 ### 2. Guava EventBus 单机异步事件驱动解耦
 - 彻底废除方法内部深度递归遍历所有行政区的反模式，消除调用栈溢出（`StackOverflowError`）与单线程瓶颈。
-- 逐级抽象出 `ProvinceEvent`、`CityEvent`、`CountyEvent`、`TownEvent`、`VillageEvent`。数据采集与数据持久化完全解耦，上级抓取完毕即发布事件，由 [`MsgEventSubscriber.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/guava/MsgEventSubscriber.java) 异步消费并触发下一层级的下钻调度。
+- 逐级抽象出 `ProvinceEvent`、`CityEvent`、`CountyEvent`、`TownEvent`、`VillageEvent`。数据采集与数据持久化完全解耦，上级抓取完毕即发布事件，由 [`MsgEventSubscriber.java`](../src/main/java/org/codework/tools/gb2260/snatch/guava/MsgEventSubscriber.java) 异步消费并触发下一层级的下钻调度。
 
 ### 3. RunThreadPoolExecutor 在途任务原子遥测与平滑收敛
-- 扩展 JUC `ThreadPoolExecutor` 研发了 [`RunThreadPoolExecutor.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/snatch/guava/RunThreadPoolExecutor.java)，重写 `execute()` 包装 Runnable，通过 `AtomicLong inFlightTasks` 原子追踪在途未完成任务。
+- 扩展 JUC `ThreadPoolExecutor` 研发了 [`RunThreadPoolExecutor.java`](../src/main/java/org/codework/tools/gb2260/snatch/guava/RunThreadPoolExecutor.java)，重写 `execute()` 包装 Runnable，通过 `AtomicLong inFlightTasks` 原子追踪在途未完成任务。
 - 重写 `shutdownNow()` 记录 `userTerminated` 标志，并通过 `isNormalCompleted()`（`!userTerminated && hasFinish && inFlightTasks == 0`）精准区分正常收敛与强制中止。
 - 当 `inFlightTasks == 0` 时调用 `notifyAll()` 唤醒守护监听线程，自动回写审计流水并优雅释放线程池资源。
 
@@ -105,14 +107,14 @@
 
 ### 5. 树状差集推导与断点自愈引擎 (Refire)
 - 若抓取任务因进程崩溃、线程中断或网络超时非正常停止，无需清空数据库重新抓取；
-- 通过对比上级与下级表分组统计（`groupBy` 聚合优化），自动推导缺失分支并作为种子精准补偿下钻（详见 [02-refire-mechanism.md](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docs/02-refire-mechanism.md)）。
+- 通过对比上级与下级表分组统计（`groupBy` 聚合优化），自动推导缺失分支并作为种子精准补偿下钻（详见 [02-refire-mechanism.md](02-refire-mechanism.md)）。
 
 ### 6. 全生命周期抓取审计流水线
-- 由 [`CrawlHistory.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/entity/CrawlHistory.java) 与 [`CrawlHistoryService.java`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/java/org/codework/tools/gb2260/service/CrawlHistoryService.java) 支撑；
+- 由 [`CrawlHistory.java`](../src/main/java/org/codework/tools/gb2260/entity/CrawlHistory.java) 与 [`CrawlHistoryService.java`](../src/main/java/org/codework/tools/gb2260/service/CrawlHistoryService.java) 支撑；
 - 记录每次全量任务（`crawl-{timestamp}`）与续爬任务（`refire-{timestamp}`）的批次标识、引擎、范围、落库条数、耗时与最终状态（`RUNNING` / `SUCCESS` / `TERMINATED` / `FAILED`）。
 
 ### 7. 零依赖内置可视化 Web 控制台 (Thymeleaf)
-- 基于 Spring Boot 内置 Thymeleaf + Bootstrap 5 构建全功能单页控制台 [`dashboard.html`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/resources/templates/dashboard.html)；
+- 基于 Spring Boot 内置 Thymeleaf + Bootstrap 5 构建全功能单页控制台 [`dashboard.html`](../src/main/resources/templates/dashboard.html)；
 - 提供动态遥测进度条、多维按需检索、历史流水查看、Redis 实时缓存代码穿透探针与前端 4 级联动测试沙箱。
 
 ---
@@ -127,3 +129,14 @@
 | **网络稳定性与策略**| 线上 API + 内置 1.9MB 权威快照自动熔断降级，**100% 成功率** | 官方网站防爬风控极严（易报 502/503），需长休眠 |
 | **全国落库耗时** | 开启快照模式约 **20 秒**；线上直连视网络约 3-5 分钟 | 约需 **1 小时**（单 IP 必须限制休眠防止封禁） |
 | **断点自愈适应性** | 完美支持省、市、县、街道多级差集补偿下钻 | 支持五级全量树状差集补偿 |
+
+---
+
+**系列专题导航**：
+- [01 - 系统全局架构与核心机制](01-architecture.md)
+- [02 - 断点续爬与差集自愈机制](02-refire-mechanism.md)
+- [03 - 接口详细规范与在线调试](03-api-guide.md)
+- [04 - 数据库与缓存拓扑设计规范](04-database-and-cache.md)
+- [05 - 生产部署与运维全景指南](05-deployment-guide.md)
+- [06 - 全链路自动化测试与质量保障](06-testing-and-validation.md)
+- [⬅️ 返回项目主页 (README.md)](../README.md)

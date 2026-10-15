@@ -2,6 +2,8 @@
 
 本文档汇编生产环境下针对 MySQL、Redis、独立 Jar、Docker 容器、Docker Compose 全栈编排及 Linux Systemd 守护进程的完整部署流程与运维手册。
 
+> **导航**：[⬅️ 返回项目主页 (README.md)](../README.md)
+
 ---
 
 ## 目录
@@ -24,7 +26,7 @@
    - **强制要求**：字符集必须为 `utf8mb4`，排序规则建议 `utf8mb4_unicode_ci`；
    - **原因**：我国部分偏远地区、少数民族自治区及特殊行政区划地名中包含生僻汉字（如“𰚼”、“䴙”等），若使用普通 `utf8`（utf8mb3）会导致持久化时报 `Incorrect string value` 异常截断。
 2. **初始化建表与数据脚本**：
-   - 建表脚本位于项目源码中：[`src/main/resources/db.sql`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/src/main/resources/db.sql)；
+   - 建表脚本位于项目源码中：[`src/main/resources/db.sql`](../src/main/resources/db.sql)；
    - 脚本包含 `province`（省）、`city`（市）、`county`（县区）、`town`（乡镇街道）、`village`（村居委）以及 `crawl_history`（历史审计表）共 6 张数据表；
    - 命令行一键初始化命令：
      ```bash
@@ -131,7 +133,7 @@ java -Xms512m -Xmx2048m \
 
 ## 四、部署方式二：Docker 容器化部署
 
-项目根目录已内置轻量级 [`Dockerfile`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/Dockerfile)，基于 Alpine Linux + OpenJDK 8 JRE 构建，体积精简。
+项目根目录已内置轻量级 [`Dockerfile`](../Dockerfile)，基于 Alpine Linux + OpenJDK 8 JRE 构建，体积精简。
 
 #### 1. 构建 Docker 镜像
 ```bash
@@ -170,7 +172,7 @@ docker logs -f gb2260-app
 
 ## 五、部署方式三：Docker Compose 一键全栈编排部署 (推荐)
 
-项目根目录下提供了开箱即用的 [`docker-compose.yml`](file:///C:/Users/Benjamin/orca/workspaces/gb2260/analyse/docker-compose.yml)，内置 MySQL 5.7（自动挂载并执行 `db.sql` 初始化）、Redis 6（带 AOF 持久化与密码保护）以及 GB2260 应用程序，三者处于同一容器专用网桥中，一键拉起整套集群。
+项目根目录下提供了开箱即用的 [`docker-compose.yml`](../docker-compose.yml)，内置 MySQL 5.7（自动挂载并执行 `db.sql` 初始化）、Redis 6（带 AOF 持久化与密码保护）以及 GB2260 应用程序，三者处于同一容器专用网桥中，一键拉起整套集群。
 
 #### 1. 一键启动全栈服务
 ```bash
@@ -276,3 +278,14 @@ journalctl -u gb2260 -f
 -XX:+UseG1GC -XX:MaxGCPauseMillis=200 -XX:+PrintGCDetails -XX:+PrintGCDateStamps \
 -Dfile.encoding=UTF-8
 ```
+
+---
+
+**系列专题导航**：
+- [01 - 系统全局架构与核心机制](01-architecture.md)
+- [02 - 断点续爬与差集自愈机制](02-refire-mechanism.md)
+- [03 - 接口详细规范与在线调试](03-api-guide.md)
+- [04 - 数据库与缓存拓扑设计规范](04-database-and-cache.md)
+- [05 - 生产部署与运维全景指南](05-deployment-guide.md)
+- [06 - 全链路自动化测试与质量保障](06-testing-and-validation.md)
+- [⬅️ 返回项目主页 (README.md)](../README.md)
