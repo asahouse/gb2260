@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库容器 (预设 utf8mb4 字符集与自动执行建表脚本)
+  mysql:
+    image: mysql:5.7
+    container_name: gb2260-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: gb2260
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./src/main/resources/db.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: >
+      --character-set-server=utf8mb4
+      --collation-server=utf8mb4_unicode_ci
+      --max_connections=500
+      --sql_mode=STRICT_TRANS_TABLES,NO_ZERO_IN_DATE,NO_ZERO_DATE,ERROR_FOR_DIVISION_BY_ZERO,NO_AUTO_CREATE_USER,NO_ENGINE_SUBSTITUTION
+    networks:
+      - gb2260-net
+
+  # Redis 高性能缓存容器 (开启 AOF 持久化)
+  redis:
+    image: redis:6-alpine
+    container_name: gb2260-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes --requirepass "rootpassword"
+    networks:
+      - gb2260-net
+
+  # GB2260 爬虫调度与级联服务容器
+  gb2260-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: gb2260-app
+    restart: always
+    depends_on:
+      - mysql
+      - redis
+    ports:
+      - "8080:8080"
+    environment:
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: rootpassword
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: rootpassword
+      GB2260_SOURCE: mca
+      MCA_OFFLINE_FIRST: "true"
+      JAVA_OPTS: "-Xms512m -Xmx2048m -Dfile.encoding=UTF-8"
+    networks:
+      - gb2260-net
+
+networks:
+  gb2260-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  redis-data:
